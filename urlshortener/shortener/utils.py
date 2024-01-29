@@ -12,7 +12,7 @@ def page_exists(url):
         response = requests.head(url)
     except:
         return None
-    return requests.head(url).status_code < 400
+    return response.status_code < 400
 
 
 def generate_short_id(length=8):
