@@ -4,6 +4,15 @@ import random
 from urllib.parse import urlparse
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+import requests
+
+
+def page_exists(url):
+    try:
+        response = requests.head(url)
+    except:
+        return None
+    return requests.head(url).status_code < 400
 
 
 def generate_short_id(length=8):
@@ -21,4 +30,5 @@ def normalize_and_validate_url(url):
     except ValidationError:
         return None
 
-    return url
+    if page_exists(url):
+        return url
