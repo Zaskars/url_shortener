@@ -9,10 +9,11 @@ import requests
 
 def page_exists(url):
     try:
-        response = requests.head(url)
-    except:
-        return None
-    return response.status_code < 400
+        response = requests.head(url, allow_redirects=True, timeout=5)
+        if response.status_code < 400:
+            return url
+    except requests.RequestException:
+        pass
 
 
 def generate_short_id(length=8):
