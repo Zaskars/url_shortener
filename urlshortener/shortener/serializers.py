@@ -12,6 +12,7 @@ class ShortenedURLSerializer(serializers.ModelSerializer):
 
 class URLInputSerializer(serializers.Serializer):
     url = serializers.CharField()
+    custom_short_id = serializers.CharField(max_length=8, required=False, allow_blank=True)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
