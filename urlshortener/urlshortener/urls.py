@@ -16,31 +16,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from rest_framework import permissions
 
 from django.urls import re_path
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from drf_spectacular import openapi
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from shortener.views import RedirectView, UserRegistrationView, UserLoginView
+from shortener.views import RedirectView, UserRegistrationView, UserLoginView, UserURLsView
 from shortener.views import ShortenURLView
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="API",
-        default_version='v1.3.3.7',
-        description="API",
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
 
 urlpatterns = [
     path('api/shorten/', ShortenURLView.as_view(), name='shorten-url'),
     path('api/redirect/<short_id>/', RedirectView.as_view(), name='redirect'),
     path('api/register/', UserRegistrationView.as_view(), name='register'),
     path('api/login/', UserLoginView.as_view(), name='login'),
-    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('api/my-urls/', UserURLsView.as_view(), name='my-urls'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
