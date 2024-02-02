@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from drf_spectacular import openapi
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -24,14 +24,16 @@ class ShortenURLView(GenericAPIView):
             custom_short_id = serializer.validated_data.get('custom_short_id')
 
             if not normalized_url:
-                return Response({'error': 'Invalid URL'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                                    'error': 'Invalid URL'
+                                }, status=status.HTTP_400_BAD_REQUEST)
 
             short_id = custom_short_id if custom_short_id else generate_short_id()
 
             if custom_short_id and ShortenedURL.objects.filter(short_id=custom_short_id).exists():
                 return Response({
-                                    'error': 'Custom short ID is (вроде is надо) already in use'
-                                }, status=status.HTTP_409_CONFLICT)
+                    'error': 'Custom short ID is (вроде is надо) already in use'
+                }, status=status.HTTP_409_CONFLICT)
 
             short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=request.user)
             return Response(ShortenedURLSerializer(short_url).data)
@@ -82,3 +84,23 @@ class UserURLsView(GenericAPIView):
         urls = ShortenedURL.objects.filter(user=request.user)
         serializer = self.get_serializer(urls, many=True)
         return Response(serializer.data)
+
+
+# TODO добавить валидацию как при создании ссылки
+class ShortURLUpdateView(RetrieveUpdateAPIView):
+    queryset = ShortenedURL.objects.all()
+    serializer_class = ShortenedURLSerializer
+    lookup_field = 'short_id'
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+
+class ShortURLDeleteView(DestroyAPIView):
+    queryset = ShortenedURL.objects.all()
+    lookup_field = 'short_id'
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
