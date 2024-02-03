@@ -2,8 +2,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers, status
 from .models import ShortenedURL
-from .utils import normalize_and_validate_url, generate_short_id
-
+from .utils import normalize_and_validate_url, generate_short_id, capture_screenshot_base64
+from django.core.files import File
 from rest_framework import serializers
 from .models import ShortenedURL
 
@@ -28,10 +28,13 @@ def handle_url(original_url, custom_short_id=None, user=None, instance=None):
         short_id = generate_short_id()
 
     if instance is None:
-        short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=user)
+        screenshot_base64 = capture_screenshot_base64(normalized_url)
+        short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=user, screenshot=screenshot_base64)
     else:
+        screenshot_base64 = capture_screenshot_base64(normalized_url)
         instance.original_url = normalized_url
         instance.short_id = short_id
+        instance.screenshot = screenshot_base64
         instance.save()
         short_url = instance
 
@@ -42,20 +45,22 @@ def handle_url(original_url, custom_short_id=None, user=None, instance=None):
 
 
 class URLInputSerializer(serializers.ModelSerializer):
-    url = serializers.CharField(source='original_url', required=False)  # Переименовываем в url для API
+    url = serializers.CharField(source='original_url', required=False)
     custom_short_id = serializers.CharField(max_length=16, required=False, allow_blank=True)
 
     class Meta:
         model = ShortenedURL
-        fields = ['url', 'custom_short_id', 'short_id']
+        fields = ['url', 'custom_short_id', 'short_id', 'screenshot']
         extra_kwargs = {
             'short_id': {
                 'read_only': True
-            }  # short_id только для чтения, его нельзя задать через API
+            },
+            'screenshot': {
+                'read_only': True
+            }
         }
 
     def validate_url(self, value):
-        # Проверка и нормализация URL
         normalized_url = normalize_and_validate_url(value)
         if not normalized_url:
             raise serializers.ValidationError("Invalid URL")
@@ -68,7 +73,6 @@ class URLInputSerializer(serializers.ModelSerializer):
         return handle_url(**validated_data, user=self.context['request'].user)
 
     def update(self, instance, validated_data):
-        # Логика обновления
         return handle_url(instance=instance, **validated_data, user=self.context['request'].user)
 
 
