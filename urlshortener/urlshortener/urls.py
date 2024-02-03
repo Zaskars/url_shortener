@@ -29,8 +29,8 @@ from shortener.views import ShortenURLView
 
 urlpatterns = [
     path('api/shorten/', ShortenURLView.as_view(), name='shorten-url'),
-    path('api/urls/<str:short_id>/update/', ShortURLUpdateView.as_view(), name='shorturl-update'),
-    path('api/urls/<str:short_id>/delete/', ShortURLDeleteView.as_view(), name='shorturl-delete'),
+    path('api/urls/<str:short_id>/', ShortURLUpdateView.as_view(), name='shorturl-update'),
+    path('api/urls/<str:short_id>/', ShortURLDeleteView.as_view(), name='shorturl-delete'),
     path('api/redirect/<short_id>/', RedirectView.as_view(), name='redirect'),
     path('api/register/', UserRegistrationView.as_view(), name='register'),
     path('api/login/', UserLoginView.as_view(), name='login'),
