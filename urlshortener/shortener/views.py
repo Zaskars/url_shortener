@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from drf_spectacular import openapi
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +12,13 @@ from .models import ShortenedURL
 from .utils import generate_short_id, normalize_and_validate_url
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, URLInputSerializer, handle_url
 from django.shortcuts import get_object_or_404, redirect
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+    page_query_param = 'p'
 
 
 class ShortenURLView(GenericAPIView):
@@ -69,9 +77,15 @@ class UserLoginView(GenericAPIView):
 class UserURLsView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = URLInputSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get(self, request, *args, **kwargs):
         urls = ShortenedURL.objects.filter(user=request.user)
+        page = self.paginate_queryset(urls)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(urls, many=True)
         return Response(serializer.data)
 
