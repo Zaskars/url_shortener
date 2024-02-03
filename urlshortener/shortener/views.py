@@ -23,7 +23,9 @@ class ShortenURLView(GenericAPIView):
                                 custom_short_id=serializer.validated_data.get('custom_short_id'),
                                 user=request.user)
             if 'error' in result:
-                return Response({ 'error': result['error'] }, status=result['status'])
+                return Response({
+                                    'error': result['error']
+                                }, status=result['status'])
             return Response(result['data'], status=result['status'])
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -89,7 +91,9 @@ class ShortURLUpdateView(RetrieveUpdateAPIView):
                                 custom_short_id=serializer.validated_data.get('custom_short_id', instance.short_id),
                                 user=request.user, instance=instance)
             if 'error' in result:
-                return Response({'error': result['error']}, status=result['status'])
+                return Response({
+                                    'error': result['error']
+                                }, status=result['status'])
             return Response(result['data'], status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
