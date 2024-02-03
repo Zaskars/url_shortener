@@ -26,11 +26,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from shortener.views import RedirectView, UserRegistrationView, UserLoginView, UserURLsView, ShortURLUpdateView, \
     ShortURLDeleteView
 from shortener.views import ShortenURLView
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('api/shorten/', ShortenURLView.as_view(), name='shorten-url'),
     path('api/urls/<str:short_id>/', ShortURLUpdateView.as_view(), name='shorturl-update'),
-    path('api/urls/<str:short_id>/', ShortURLDeleteView.as_view(), name='shorturl-delete'),
+    path('api/urls/<str:short_id>/delete', ShortURLDeleteView.as_view(), name='shorturl-delete'),
     path('api/redirect/<short_id>/', RedirectView.as_view(), name='redirect'),
     path('api/register/', UserRegistrationView.as_view(), name='register'),
     path('api/login/', UserLoginView.as_view(), name='login'),
@@ -41,4 +44,4 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
