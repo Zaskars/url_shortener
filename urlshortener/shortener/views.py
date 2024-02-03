@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import ShortenedURL
 from .utils import generate_short_id, normalize_and_validate_url
-from .serializers import ShortenedURLSerializer, UserRegistrationSerializer, UserLoginSerializer, URLInputSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, URLInputSerializer, handle_url
 from django.shortcuts import get_object_or_404, redirect
 
 
@@ -19,24 +19,12 @@ class ShortenURLView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            original_url = serializer.validated_data['url']
-            normalized_url = normalize_and_validate_url(original_url)
-            custom_short_id = serializer.validated_data.get('custom_short_id')
-
-            if not normalized_url:
-                return Response({
-                                    'error': 'Invalid URL'
-                                }, status=status.HTTP_400_BAD_REQUEST)
-
-            short_id = custom_short_id if custom_short_id else generate_short_id()
-
-            if custom_short_id and ShortenedURL.objects.filter(short_id=custom_short_id).exists():
-                return Response({
-                    'error': 'Custom short ID is (вроде is надо) already in use'
-                }, status=status.HTTP_409_CONFLICT)
-
-            short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=request.user)
-            return Response(ShortenedURLSerializer(short_url).data)
+            result = handle_url(serializer.validated_data['original_url'],
+                                custom_short_id=serializer.validated_data.get('custom_short_id'),
+                                user=request.user)
+            if 'error' in result:
+                return Response({ 'error': result['error'] }, status=result['status'])
+            return Response(result['data'], status=result['status'])
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -78,7 +66,7 @@ class UserLoginView(GenericAPIView):
 
 class UserURLsView(GenericAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = ShortenedURLSerializer
+    serializer_class = URLInputSerializer
 
     def get(self, request, *args, **kwargs):
         urls = ShortenedURL.objects.filter(user=request.user)
@@ -89,12 +77,21 @@ class UserURLsView(GenericAPIView):
 # TODO добавить валидацию как при создании ссылки
 class ShortURLUpdateView(RetrieveUpdateAPIView):
     queryset = ShortenedURL.objects.all()
-    serializer_class = ShortenedURLSerializer
+    serializer_class = URLInputSerializer
     lookup_field = 'short_id'
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            result = handle_url(serializer.validated_data.get('original_url', instance.original_url),
+                                custom_short_id=serializer.validated_data.get('custom_short_id', instance.short_id),
+                                user=request.user, instance=instance)
+            if 'error' in result:
+                return Response({'error': result['error']}, status=result['status'])
+            return Response(result['data'], status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ShortURLDeleteView(DestroyAPIView):
