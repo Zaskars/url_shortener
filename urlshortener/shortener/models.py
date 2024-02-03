@@ -5,7 +5,7 @@ import uuid
 
 class ShortenedURL(models.Model):
     original_url = models.URLField()
-    short_id = models.CharField(max_length=8, unique=True)
+    short_id = models.CharField(max_length=16, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
