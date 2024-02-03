@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import requests
+from rest_framework import status
+
 
 
 def page_exists(url):
