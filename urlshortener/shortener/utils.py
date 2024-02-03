@@ -5,8 +5,25 @@ from urllib.parse import urlparse
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import requests
-from rest_framework import status
 
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
+import hashlib
+import os
+
+
+def capture_screenshot_base64(url):
+    service = Service(GeckoDriverManager().install())
+    options = webdriver.FirefoxOptions()
+    options.headless = True
+    driver = webdriver.Firefox(service=service, options=options)
+    driver.get(url)
+    driver.implicitly_wait(5)
+
+    screenshot_base64 = driver.get_screenshot_as_base64()
+    driver.quit()
+    return screenshot_base64
 
 
 def page_exists(url):
