@@ -86,23 +86,13 @@ class UserURLsView(GenericAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ShortenedURLFilter
     ordering_fields = ['original_url', 'short_id']
-    ordering = ['short_id']
+    ordering = ['original_url']
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='p', description='page number', required=False, type=OpenApiTypes.INT),
-            OpenApiParameter(name='page_size', description='number of items per page', required=False,
-                             type=OpenApiTypes.INT),
-            OpenApiParameter(name='ordering', description='which field to use when ordering the results',
-                             required=False, type=OpenApiTypes.STR),
-            OpenApiParameter(name='filtering', description='filtering',
-                             required=False, type=OpenApiTypes.STR),
-        ]
-    )
     def get(self, request, *args, **kwargs):
         urls = ShortenedURL.objects.filter(user=request.user)
-        page = self.paginate_queryset(urls)
         urls = self.filter_queryset(urls)
+        page = self.paginate_queryset(urls)
+
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
