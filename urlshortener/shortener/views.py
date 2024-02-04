@@ -88,6 +88,22 @@ class UserURLsView(GenericAPIView):
     ordering_fields = ['original_url', 'short_id']
     ordering = ['original_url']
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='original_url', type=OpenApiTypes.STR, description='Фильтр по URL (exact)', required=False),
+            OpenApiParameter(name='original_url__icontains', type=OpenApiTypes.STR, description='Фильтр по URL (contains)', required=False),
+            OpenApiParameter(name='short_id', type=OpenApiTypes.STR,
+                             description='Фильтр по ID (exact)', required=False),
+            OpenApiParameter(name='short_id__icontains', type=OpenApiTypes.STR,
+                             description='Фильтр по ID (contains)', required=False),
+            OpenApiParameter(name='ordering', type=OpenApiTypes.STR, description='Сортировка результатов',
+                             required=False),
+            OpenApiParameter(name='p', type=OpenApiTypes.INT, description='Номер страницы',
+                             required=False),
+            OpenApiParameter(name='page_size', type=OpenApiTypes.INT, description='Размер страницы',
+                             required=False),
+        ]
+    )
     def get(self, request, *args, **kwargs):
         urls = ShortenedURL.objects.filter(user=request.user)
         urls = self.filter_queryset(urls)
