@@ -1,11 +1,12 @@
 import django_filters
 from .models import ShortenedURL
+from django_filters import rest_framework as filters
 
 
-class ShortenedURLFilter(django_filters.FilterSet):
+class ShortenedURLFilter(filters.FilterSet):
     class Meta:
         model = ShortenedURL
         fields = {
-            'original_url': ['exact', 'contains'],
-            'short_id': ['exact'],
+            'original_url': ['exact', 'icontains'],
+            'short_id': ['exact', 'icontains'],
         }
