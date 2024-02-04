@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "shortener",
     'drf_spectacular',
     'corsheaders',
+    'django_filters',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -82,8 +83,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
