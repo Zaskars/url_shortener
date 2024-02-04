@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular import openapi
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -7,7 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.filters import OrderingFilter
 
+from .filters import ShortenedURLFilter
 from .models import ShortenedURL
 from .utils import generate_short_id, normalize_and_validate_url
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, URLInputSerializer, handle_url
@@ -78,10 +83,26 @@ class UserURLsView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = URLInputSerializer
     pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = ShortenedURLFilter
+    ordering_fields = ['original_url', 'short_id']
+    ordering = ['short_id']
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='p', description='page number', required=False, type=OpenApiTypes.INT),
+            OpenApiParameter(name='page_size', description='number of items per page', required=False,
+                             type=OpenApiTypes.INT),
+            OpenApiParameter(name='ordering', description='which field to use when ordering the results',
+                             required=False, type=OpenApiTypes.STR),
+            OpenApiParameter(name='filtering', description='filtering',
+                             required=False, type=OpenApiTypes.STR),
+        ]
+    )
     def get(self, request, *args, **kwargs):
         urls = ShortenedURL.objects.filter(user=request.user)
         page = self.paginate_queryset(urls)
+        urls = self.filter_queryset(urls)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
