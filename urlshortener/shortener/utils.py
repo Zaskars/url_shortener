@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 import requests
+from pyppeteer import launch
 
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -13,17 +14,13 @@ import hashlib
 import os
 
 
-def capture_screenshot_base64(url):
-    service = Service(GeckoDriverManager().install())
-    options = webdriver.FirefoxOptions()
-    options.headless = True
-    driver = webdriver.Firefox(service=service, options=options)
-    driver.get(url)
-    driver.implicitly_wait(2)
-
-    screenshot_base64 = driver.get_screenshot_as_base64()
-    driver.quit()
-    return screenshot_base64
+async def capture_screenshot_base64(url):
+    browser = await launch()
+    page = await browser.newPage()
+    await page.goto(url, {'timeout': 30000})
+    screenshot = await page.screenshot({'encoding': 'base64'})
+    await browser.close()
+    return screenshot
 
 
 def page_exists(url):
