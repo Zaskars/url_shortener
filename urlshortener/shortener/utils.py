@@ -19,7 +19,7 @@ def capture_screenshot_base64(url):
     options.headless = True
     driver = webdriver.Firefox(service=service, options=options)
     driver.get(url)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(2)
 
     screenshot_base64 = driver.get_screenshot_as_base64()
     driver.quit()
