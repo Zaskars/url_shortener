@@ -1,3 +1,6 @@
+import asyncio
+
+from asgiref.sync import sync_to_async, async_to_sync
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers, status
@@ -6,6 +9,7 @@ from .utils import normalize_and_validate_url, generate_short_id, capture_screen
 from django.core.files import File
 from rest_framework import serializers
 from .models import ShortenedURL
+from .tasks import capture_screenshot_task
 
 
 def handle_url(original_url, custom_short_id=None, user=None, instance=None):
@@ -27,14 +31,17 @@ def handle_url(original_url, custom_short_id=None, user=None, instance=None):
     else:
         short_id = generate_short_id()
 
+    try:
+        task_result = capture_screenshot_task.delay(normalized_url)
+        screenshot_base64 = task_result.get(timeout=60)
+    except Exception as e:
+        print(e)
+        screenshot_base64 = ''
+
     if instance is None:
-        try:
-            screenshot_base64 = capture_screenshot_base64(normalized_url)
-        except:
-            screenshot_base64 = 'something wrong with the screenshooter (firefox used)'
-        short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=user, screenshot=screenshot_base64)
+        short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=user,
+                                                screenshot=screenshot_base64)
     else:
-        screenshot_base64 = capture_screenshot_base64(normalized_url)
         instance.original_url = normalized_url
         instance.short_id = short_id
         instance.screenshot = screenshot_base64
