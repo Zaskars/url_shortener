@@ -1,6 +1,5 @@
-FROM python:3.8-slim
+FROM python:3.10-slim
 
-# Установите необходимые системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     firefox-esr \
     wget \
@@ -10,15 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && chmod +x geckodriver \
     && mv geckodriver /usr/local/bin/
 
-# Установите рабочую директорию в контейнере
 WORKDIR /app
 
-# Копируйте файлы проекта и файлы зависимостей в контейнер
 COPY . /app
 COPY requirements.txt /app/
 
-# Установите зависимости Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Определите команду для запуска приложения
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "urlshortener.wsgi:application"]
