@@ -31,7 +31,7 @@ def handle_url(original_url, custom_short_id=None, user=None, instance=None):
         try:
             screenshot_base64 = capture_screenshot_base64(normalized_url)
         except:
-            screenshot_base64 = 'something wrong with the screenshooter'
+            screenshot_base64 = 'something wrong with the screenshooter (firefox used)'
         short_url = ShortenedURL.objects.create(original_url=normalized_url, short_id=short_id, user=user, screenshot=screenshot_base64)
     else:
         screenshot_base64 = capture_screenshot_base64(normalized_url)
