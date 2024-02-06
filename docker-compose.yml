@@ -13,6 +13,7 @@ services:
       - "5432:5432"
 
   web:
+    tty: true
     build: .
     command: >
       sh -c "python urlshortener/manage.py migrate &&
@@ -33,12 +34,13 @@ services:
 
   celery:
     build: .
-    command: celery -A urlshortener worker --loglevel=info -P solo
+    command: >
+      sh -c "cd urlshortener &&
+             celery -A urlshortener worker --loglevel=info -P solo"
     volumes:
       - .:/app
     environment:
       - DEBUG=1
-      - DJANGO_SETTINGS_MODULE=urlshortener.settings
     depends_on:
       - web
       - redis
