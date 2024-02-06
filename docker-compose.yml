@@ -31,6 +31,19 @@ services:
       DB_PORT: 5432
       DJANGO_SETTINGS_MODULE: urlshortener.settings
 
+  celery:
+    build: .
+    command: >
+      sh -c "cd urlshortener &&
+             celery -A urlshortener worker --loglevel=info -P solo"
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=1
+    depends_on:
+      - web
+      - redis
+
   redis:
     image: "redis:alpine"
 

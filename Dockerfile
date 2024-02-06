@@ -7,5 +7,5 @@ COPY . /app
 COPY requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN celery -A urlshortener worker --loglevel=info -P solo
+
 
