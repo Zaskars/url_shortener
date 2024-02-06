@@ -38,6 +38,7 @@ services:
       - .:/app
     environment:
       - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=urlshortener.settings
     depends_on:
       - web
       - redis
