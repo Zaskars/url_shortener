@@ -10,7 +10,7 @@ http сервис для сокращения url
 
 # Запуск
 
-#### `docker-build up --build`
+#### `docker-compose up --build`
 
 > Важно! В проекте реализован автоматический скриншот с помощью pyppeteer (и, соответственно, celery + redis), в котором иногда возникает проблема с совместимостью **importlib-metadata**. Лично у меня все отлично, но может быть вам не повезет :) (тестил на ubuntu 20.04 lts)
 https://stackoverflow.com/questions/74025035/importerror-cannot-import-name-celery-from-celery
