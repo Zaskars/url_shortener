@@ -2,13 +2,10 @@ FROM python:3.10-slim
 ENV PYTHONBUFFERED=1
 
 RUN apt-get update && apt-get install -y \
-    wget \
-    unzip \
-    fontconfig \
-    locales \
     gconf-service \
     libasound2 \
     libatk1.0-0 \
+    libatk-bridge2.0-0 \
     libc6 \
     libcairo2 \
     libcups2 \
@@ -43,6 +40,7 @@ RUN apt-get update && apt-get install -y \
     libnss3 \
     lsb-release \
     xdg-utils \
+    wget \
     fonts-wqy-zenhei \
     && rm -rf /var/lib/apt/lists/*
 
