@@ -13,8 +13,10 @@ services:
       - "5432:5432"
 
   web:
-    build: .
-    command: python urlshortener/manage.py runserver 0.0.0.0:8000
+    build: ..
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     container_name: django
     volumes:
       - .:/app
@@ -30,7 +32,7 @@ services:
       DJANGO_SETTINGS_MODULE: urlshortener.settings
 
   celery:
-    build: .
+    build: ..
     command: celery -A urlshortener worker --loglevel=info -P solo
     volumes:
       - .:/app
