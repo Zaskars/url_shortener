@@ -27,7 +27,6 @@ services:
       DB_PASS: 72metra
       DB_PORT: 5432
       DJANGO_SETTINGS_MODULE: urlshortener.settings
-    entrypoint: ["entrypoint.sh"]
 
   celery:
     build: .
