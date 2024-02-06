@@ -15,7 +15,7 @@ import os
 
 
 async def capture_screenshot_base64(url):
-    browser = await launch()
+    browser = await launch(headless=True)
     page = await browser.newPage()
     await page.goto(url, {'timeout': 30000})
     screenshot = await page.screenshot({'encoding': 'base64'})
