@@ -1,4 +1,4 @@
-# url_shortener
+# url shortener
 
 http сервис для сокращения url
 - UI реализован с помощью **Swagger (drf-spectacular)**;
