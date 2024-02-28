@@ -1,4 +1,3 @@
-import django_filters
 from .models import ShortenedURL
 from django_filters import rest_framework as filters
 

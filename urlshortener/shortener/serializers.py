@@ -1,12 +1,7 @@
-import asyncio
-
-from asgiref.sync import sync_to_async, async_to_sync
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from rest_framework import serializers, status
-from .models import ShortenedURL
+from rest_framework import status
 from .utils import normalize_and_validate_url, generate_short_id, capture_screenshot_base64
-from django.core.files import File
 from rest_framework import serializers
 from .models import ShortenedURL
 from .tasks import capture_screenshot_task

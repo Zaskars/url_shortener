@@ -7,12 +7,6 @@ from django.core.exceptions import ValidationError
 import requests
 from pyppeteer import launch
 
-from selenium import webdriver
-from selenium.webdriver.firefox.service import Service
-from webdriver_manager.firefox import GeckoDriverManager
-import hashlib
-import os
-
 
 async def capture_screenshot_base64(url):
     browser = await launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox'])

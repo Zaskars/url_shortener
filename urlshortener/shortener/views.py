@@ -1,6 +1,4 @@
-from django.contrib.auth import authenticate
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular import openapi
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
